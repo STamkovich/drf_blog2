@@ -65,3 +65,4 @@ class FeedBackView(APIView):
             message = data.get('message')
             send_mail(f'От {name} | {subject}', message, from_email, ['riki@gmail.com'])  # отправляем эти данные на почту при помощи функции send_mail
             return Response({"success": "Sent"})
+# ghbdt
