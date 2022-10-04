@@ -41,3 +41,32 @@ class ContactSerailizer(serializers.Serializer):
     email = serializers.CharField()
     subject = serializers.CharField()
     message = serializers.CharField()
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password2 = serializers.CharField(write_only=True)  # write_only Установите это значение True, чтобы поле можно было использовать при обновлении или создании экземпляра, но оно не включалось при сериализации представления.
+
+    class Meta:    # модель на основе которой создаем сериализатор и указываем поля, который будут доступны для нашей апишки:
+        model = User
+        fields = [
+            "username",
+            "password",
+            "password2",
+        ]
+        extra_kwargs = {"password": {"write_only": True}}
+
+    def create(self, validated_data): # метод create. Он нужен для сохранения инстансов - для создания пользователей
+        username = validated_data["username"]
+        password = validated_data["password"]
+        password2 = validated_data["password2"]
+        if password != password2:
+            raise serializers.ValidationError({"password": "Пароли не совпадают"})
+        user = User(username=username)
+        user.set_password(password)
+        user.save()
+        return user
+
+class UserSerializer(serializers.ModelSerializer): # сериализатор, который возвращает нам все данные о пользователе
+    class Meta:
+        model = User
+        fields = '__all__'

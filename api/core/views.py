@@ -3,7 +3,7 @@ from rest_framework import viewsets, permissions, generics, filters
 from rest_framework.views import APIView
 from taggit.models import Tag
 
-from .serializers import PostSerializer, TagSerializer, ContactSerailizer
+from .serializers import PostSerializer, TagSerializer, ContactSerailizer, RegisterSerializer, UserSerializer
 from .models import Post
 from rest_framework.response import Response
 from rest_framework import pagination
@@ -15,7 +15,8 @@ class PageNumberSetPagination(pagination.PageNumberPagination):
     ordering = 'created_at'
 
 
-class PostViewSet(viewsets.ModelViewSet):  # viewsets.ModelViewSet позволяют нам объединить все вышеописанное в одну вьюху.
+class PostViewSet(
+    viewsets.ModelViewSet):  # viewsets.ModelViewSet позволяют нам объединить все вышеописанное в одну вьюху.
     # Она будет отвечать и за то, чтобы отдавать список всех записей и за то, чтобы отдавать одну конкретную запись. Класс SearchFilter делает за нас query запросы
     search_fields = ['$content', '$h1']  # поиск будет осуществляться по полям нашей модели h1 и content.
     filter_backends = (filters.SearchFilter,)  # указали, какой фильтр будет осуществлять поиск,
@@ -56,13 +57,31 @@ class FeedBackView(APIView):
 
     @staticmethod
     def post(request, *args, **kwargs):
-        serializer_class = ContactSerailizer(data=request.data) # сохраним данные которые нам пришли с фронта:
+        serializer_class = ContactSerailizer(data=request.data)  # сохраним данные которые нам пришли с фронта:
         if serializer_class.is_valid():
             data = serializer_class.validated_data
             name = data.get('name')  # собираем данные в отдельные переменные:
             from_email = data.get('email')
             subject = data.get('subject')
             message = data.get('message')
-            send_mail(f'От {name} | {subject}', message, from_email, ['riki@gmail.com'])  # отправляем эти данные на почту при помощи функции send_mail
+            send_mail(f'От {name} | {subject}', message, from_email,
+                      ['riki@gmail.com'])  # отправляем эти данные на почту при помощи функции send_mail
             return Response({"success": "Sent"})
-# ghbdt
+
+
+class RegisterView(generics.GenericAPIView):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = RegisterSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data) # Данная строчка подготавливает объект или инстанс для отправки в сериалайзер, забирая все данные из request и отправляя в RegisterSerializer.
+        serializer.is_valid(raise_exception=True) # Далле все данные проверяются на валидность и в случае чего возбуждаются исключения.
+        user = serializer.save()  # user = serializer.save()
+        return Response({
+            "user": UserSerializer(user, context=self.get_serializer_context()).data,
+            "message": "Пользователь успешно создан",
+        })
+
+
+class ProfileView:
+    pass
