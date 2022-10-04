@@ -1,4 +1,5 @@
-from rest_framework import viewsets, permissions, generics
+from django.core.mail import send_mail
+from rest_framework import viewsets, permissions, generics, filters
 from rest_framework.views import APIView
 from taggit.models import Tag
 
@@ -14,9 +15,10 @@ class PageNumberSetPagination(pagination.PageNumberPagination):
     ordering = 'created_at'
 
 
-class PostViewSet(
-    viewsets.ModelViewSet):  # viewsets.ModelViewSet позволяют нам объединить все вышеописанное в одну вьюху.
-    # Она будет отвечать и за то чтобы отдавать список всех записей и за то, чтобы отдавать одну конкретную запись.
+class PostViewSet(viewsets.ModelViewSet):  # viewsets.ModelViewSet позволяют нам объединить все вышеописанное в одну вьюху.
+    # Она будет отвечать и за то, чтобы отдавать список всех записей и за то, чтобы отдавать одну конкретную запись. Класс SearchFilter делает за нас query запросы
+    search_fields = ['$content', '$h1']  # поиск будет осуществляться по полям нашей модели h1 и content.
+    filter_backends = (filters.SearchFilter,)  # указали, какой фильтр будет осуществлять поиск,
     serializer_class = PostSerializer  # мы создаем определяем сериалайзер для работы с моделью Post.
     queryset = Post.objects.all()  # определяем queryset который мы будем возвращать:
     lookup_field = 'slug'  # указываем поле по которому будем получать одну конкретную запись
@@ -52,13 +54,14 @@ class FeedBackView(APIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = ContactSerailizer
 
-    def post(self, request, *args, **kwargs):
-        serializer_class = ContactSerailizer(data=request.data)
+    @staticmethod
+    def post(request, *args, **kwargs):
+        serializer_class = ContactSerailizer(data=request.data) # сохраним данные которые нам пришли с фронта:
         if serializer_class.is_valid():
             data = serializer_class.validated_data
-            name = data.get('name')
+            name = data.get('name')  # собираем данные в отдельные переменные:
             from_email = data.get('email')
             subject = data.get('subject')
             message = data.get('message')
-            send_mail(f'От {name} | {subject}', message, from_email, ['amromashov@gmail.com'])
+            send_mail(f'От {name} | {subject}', message, from_email, ['riki@gmail.com'])  # отправляем эти данные на почту при помощи функции send_mail
             return Response({"success": "Sent"})

@@ -184,5 +184,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'tamkovich1072@gmail.com'
-EMAIL_HOST_PASSWORD = 'tuktmfakzhwvzxqd'
+EMAIL_HOST_USER = 'riki2@gmail.com'
+EMAIL_HOST_PASSWORD = 'your google password'
+
+REST_FRAMEWORK = {
+    'SEARCH_PARAM': 'q'  # по умолчанию в качестве квери параметра для поиска используется ключевое слово search
+}
