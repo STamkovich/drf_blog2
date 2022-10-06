@@ -44,9 +44,10 @@ class ContactSerailizer(serializers.Serializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password2 = serializers.CharField(write_only=True)  # write_only Установите это значение True, чтобы поле можно было использовать при обновлении или создании экземпляра, но оно не включалось при сериализации представления.
+    password2 = serializers.CharField(
+        write_only=True)  # write_only Установите это значение True, чтобы поле можно было использовать при обновлении или создании экземпляра, но оно не включалось при сериализации представления.
 
-    class Meta:    # модель на основе которой создаем сериализатор и указываем поля, который будут доступны для нашей апишки:
+    class Meta:  # модель на основе которой создаем сериализатор и указываем поля, который будут доступны для нашей апишки:
         model = User
         fields = [
             "username",
@@ -55,7 +56,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         ]
         extra_kwargs = {"password": {"write_only": True}}
 
-    def create(self, validated_data): # метод create. Он нужен для сохранения инстансов - для создания пользователей
+    def create(self, validated_data):  # метод create. Он нужен для сохранения инстансов - для создания пользователей
         username = validated_data["username"]
         password = validated_data["password"]
         password2 = validated_data["password2"]
@@ -66,7 +67,28 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
-class UserSerializer(serializers.ModelSerializer): # сериализатор, который возвращает нам все данные о пользователе
+
+class UserSerializer(serializers.ModelSerializer):  # сериализатор, который возвращает нам все данные о пользователе
     class Meta:
         model = User
         fields = '__all__'
+
+
+from .models import Comment
+
+
+from .models import Comment
+
+
+class CommentSerializer(serializers.ModelSerializer):
+
+    username = serializers.SlugRelatedField(slug_field="username", queryset=User.objects.all())
+    post = serializers.SlugRelatedField(slug_field="slug", queryset=Post.objects.all())
+
+    class Meta:
+        model = Comment
+        fields = ("id", "post", "username", "text", "created_date")
+        lookup_field = 'id'
+        extra_kwargs = {
+            'url': {'lookup_field': 'id'}
+        }

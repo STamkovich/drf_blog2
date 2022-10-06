@@ -77,6 +77,7 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.DjangoModelPermissions",),
+    'SEARCH_PARAM': 'q'  # по умолчанию в качестве квери параметра для поиска используется ключевое слово search
 }
 
 TEMPLATES = [
@@ -149,7 +150,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'  # <- добавьте путь к папке с меди файлами
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # и путь до нее
 
-CKEDITOR_UPLOAD_PATH = "uploads/"
 
 ####################################
 #  CKEDITOR CONFIGURATION ##
@@ -187,6 +187,3 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'riki2@gmail.com'
 EMAIL_HOST_PASSWORD = 'your google password'
 
-REST_FRAMEWORK = {
-    'SEARCH_PARAM': 'q'  # по умолчанию в качестве квери параметра для поиска используется ключевое слово search
-}

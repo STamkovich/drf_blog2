@@ -1,4 +1,4 @@
-#!/home/sergey/PycharmProjects/my_drf_blog/myvenv/bin/python3
+#!/home/sergey/PycharmProjects/my_drf_blog/myvenv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

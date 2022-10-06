@@ -3,8 +3,9 @@ from rest_framework import viewsets, permissions, generics, filters
 from rest_framework.views import APIView
 from taggit.models import Tag
 
-from .serializers import PostSerializer, TagSerializer, ContactSerailizer, RegisterSerializer, UserSerializer
-from .models import Post
+from .serializers import PostSerializer, TagSerializer, ContactSerailizer, RegisterSerializer, UserSerializer, \
+    CommentSerializer
+from .models import Post, Comment
 from rest_framework.response import Response
 from rest_framework import pagination
 
@@ -74,8 +75,10 @@ class RegisterView(generics.GenericAPIView):
     serializer_class = RegisterSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data) # Данная строчка подготавливает объект или инстанс для отправки в сериалайзер, забирая все данные из request и отправляя в RegisterSerializer.
-        serializer.is_valid(raise_exception=True) # Далле все данные проверяются на валидность и в случае чего возбуждаются исключения.
+        serializer = self.get_serializer(
+            data=request.data)  # Данная строчка подготавливает объект или инстанс для отправки в сериалайзер, забирая все данные из request и отправляя в RegisterSerializer.
+        serializer.is_valid(
+            raise_exception=True)  # Далле все данные проверяются на валидность и в случае чего возбуждаются исключения.
         user = serializer.save()  # user = serializer.save()
         return Response({
             "user": UserSerializer(user, context=self.get_serializer_context()).data,
@@ -83,5 +86,26 @@ class RegisterView(generics.GenericAPIView):
         })
 
 
-class ProfileView:
-    pass
+class ProfileView(generics.GenericAPIView):
+    permission_classes = [
+        permissions.IsAuthenticated]  # Права к этой вьюхе будут иметь только авторизованные пользователи.
+    serializer_class = UserSerializer
+
+    def get(self, request, *args, **kwargs):
+        return Response({
+            "user": UserSerializer(request.user, context=self.get_serializer_context()).data,
+        })
+
+
+class CommentView(generics.ListCreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        post_slug = self.kwargs['post_slug'].lower()
+        post = Post.objects.get(slug=post_slug)
+        return Comment.objects.filter(post=post)
+
+# get_queryset(self)
+# Возвращает набор запросов, который следует использовать для списковых представлений и который следует использовать в качестве основы для поиска в подробных представлениях. По умолчанию возвращает набор запросов, указанный querysetатрибутом.
